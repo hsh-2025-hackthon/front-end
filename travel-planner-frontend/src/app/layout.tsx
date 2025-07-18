@@ -1,30 +1,17 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "OurGo | 與親友一起規劃完美旅程",
-  description: "OurGo 是協作式旅行規劃平台，讓您與朋友家人一起創建、分享和管理旅行行程。智能規劃、即時同步、預算管理，打造您的完美旅行體驗。",
-  keywords: "OurGo, 旅行規劃, 行程規劃, 協作旅行, 旅遊計劃, 團體旅行",
+  title: "OurGo | 與朋友家人一起規劃完美旅程",
+  description: "OurGo 讓旅行規劃變得簡單有趣！與朋友家人協作創建、分享和管理您的旅行行程。即時同步，輕鬆分帳，讓每一次旅行都成為美好回憶。",
+  keywords: "旅行規劃, 行程安排, 協作旅行, 多人旅遊, 分帳, OurGo",
   authors: [{ name: "OurGo Team" }],
-  openGraph: {
-    title: "OurGo | 與親友一起規劃完美旅程",
-    description: "OurGo 是協作式旅行規劃平台，讓您與朋友家人一起創建、分享和管理旅行行程。",
-    type: "website",
-    locale: "zh_TW",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "OurGo | 與親友一起規劃完美旅程",
-    description: "OurGo 是協作式旅行規劃平台，讓您與朋友家人一起創建、分享和管理旅行行程。",
-  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -33,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-TW" className={inter.variable}>
-      <body className="font-sans antialiased">
+    <html lang="zh-TW">
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

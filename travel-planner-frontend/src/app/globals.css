@@ -1,251 +1,275 @@
 @import "tailwindcss";
 
 :root {
-  /* 主色調：天際藍 */
-  --primary-blue: #0EA5E9;
-  --primary-blue-light: #38BDF8;
-  --primary-blue-dark: #0284C7;
+  /* OurGo Color Palette */
+  --primary-sky-blue: #0ea5e9;
+  --primary-sky-blue-light: #38bdf8;
+  --primary-sky-blue-dark: #0284c7;
+  --accent-coral: #ff6b6b;
+  --accent-coral-light: #ff8787;
+  --accent-coral-dark: #ff5252;
+  --success-mint: #4ecdc4;
+  --success-mint-light: #81e6d9;
+  --success-mint-dark: #2dd4bf;
+  --neutral-white: #ffffff;
+  --neutral-gray-50: #f8fafc;
+  --neutral-gray-100: #f1f5f9;
+  --neutral-gray-200: #e2e8f0;
+  --neutral-gray-300: #cbd5e1;
+  --neutral-gray-400: #94a3b8;
+  --neutral-gray-500: #64748b;
+  --neutral-gray-600: #475569;
+  --neutral-gray-700: #334155;
+  --neutral-gray-800: #1e293b;
+  --neutral-gray-900: #0f172a;
   
-  /* 強調色：珊瑚橘 */
-  --coral: #FF6B6B;
-  --coral-light: #FF8E8E;
-  --coral-dark: #E55353;
-  
-  /* 輔助色：青草綠 */
-  --mint-green: #4ADE80;
-  --mint-green-light: #6EE7A7;
-  --mint-green-dark: #16A34A;
-  
-  /* 背景與文字 */
-  --background: #FAFAFA;
-  --surface: #FFFFFF;
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --text-light: #9CA3AF;
-  
-  /* 陰影與邊框 */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --border-light: #E5E7EB;
-  --border-medium: #D1D5DB;
+  /* Theme Variables */
+  --background: linear-gradient(135deg, var(--primary-sky-blue-light) 0%, var(--primary-sky-blue) 50%, var(--accent-coral-light) 100%);
+  --foreground: var(--neutral-gray-800);
+  --card-background: var(--neutral-white);
+  --card-foreground: var(--neutral-gray-700);
+  --border: var(--neutral-gray-200);
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-hover: rgba(0, 0, 0, 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0F172A;
-    --surface: #1E293B;
-    --text-primary: #F1F5F9;
-    --text-secondary: #CBD5E1;
-    --text-light: #94A3B8;
-    --border-light: #334155;
-    --border-medium: #475569;
+    --background: linear-gradient(135deg, var(--neutral-gray-900) 0%, var(--neutral-gray-800) 50%, var(--primary-sky-blue-dark) 100%);
+    --foreground: var(--neutral-gray-100);
+    --card-background: var(--neutral-gray-800);
+    --card-foreground: var(--neutral-gray-100);
+    --border: var(--neutral-gray-700);
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-hover: rgba(0, 0, 0, 0.4);
   }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   background: var(--background);
-  color: var(--text-primary);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
   line-height: 1.6;
+  min-height: 100vh;
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 自定義滾動條 */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: var(--neutral-gray-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-blue);
+  background: var(--primary-sky-blue);
   border-radius: 4px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-blue-dark);
+  background: var(--primary-sky-blue-dark);
 }
 
-/* 動畫效果 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
+/* OurGo Animation Library */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes bounce {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
 }
 
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideInLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.7; }
 }
 
-/* 實用動畫類 */
-.animate-fadeInUp {
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-.animate-fadeInLeft {
-  animation: fadeInLeft 0.8s ease-out forwards;
-}
-
-.animate-fadeInRight {
-  animation: fadeInRight 0.8s ease-out forwards;
-}
-
+/* Animation Classes */
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.6s ease-out forwards;
 }
 
 .animate-bounce {
-  animation: bounce 2s ease-in-out infinite;
+  animation: bounce 2s infinite;
 }
 
 .animate-pulse {
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse 2s infinite;
 }
 
-/* 延遲動畫 */
-.animate-delay-200 { animation-delay: 0.2s; }
-.animate-delay-400 { animation-delay: 0.4s; }
-.animate-delay-600 { animation-delay: 0.6s; }
-.animate-delay-800 { animation-delay: 0.8s; }
-
-/* 卡片樣式 */
-.card {
-  background: var(--surface);
-  border-radius: 16px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-light);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-}
-
-/* 按鈕樣式 */
+/* Micro-interactions */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+  background: linear-gradient(to right, #0ea5e9, #0284c7);
   color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 500;
-  cursor: pointer;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
   transition: all 0.3s ease;
+  transform: scale(1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, var(--primary-blue-light), var(--primary-blue));
+  background: linear-gradient(to right, #0284c7, #0369a1);
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
 }
 
 .btn-coral {
-  background: linear-gradient(135deg, var(--coral), var(--coral-dark));
+  background: linear-gradient(to right, #fb923c, #f97316);
   color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 500;
-  cursor: pointer;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
   transition: all 0.3s ease;
+  transform: scale(1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .btn-coral:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, var(--coral-light), var(--coral));
+  background: linear-gradient(to right, #f97316, #ea580c);
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* 旅行主題裝飾 */
-.travel-pattern {
-  position: relative;
-  overflow: hidden;
+.btn-coral:active {
+  transform: scale(0.95);
 }
 
-.travel-pattern::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255, 107, 107, 0.1) 0%, transparent 50%);
-  pointer-events: none;
+.btn-coral:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.2);
 }
 
-/* 手繪風格線條 */
-.hand-drawn-line {
-  position: relative;
+.btn-mint {
+  background: linear-gradient(to right, #2dd4bf, #14b8a6);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  transform: scale(1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.hand-drawn-line::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--coral), var(--coral-light));
-  border-radius: 2px;
-  transform: scaleX(0);
-  transform-origin: left;
-  animation: drawLine 1s ease-out forwards;
+.btn-mint:hover {
+  background: linear-gradient(to right, #14b8a6, #0f766e);
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes drawLine {
-  to {
-    transform: scaleX(1);
+.btn-mint:active {
+  transform: scale(0.95);
+}
+
+.btn-mint:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.2);
+}
+
+.card-ourgo {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.card-ourgo:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .card-ourgo {
+    background: #1e293b;
+    border-color: #334155;
   }
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(to right, white, white);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 6rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 32rem;
+  margin: 0 auto 2rem;
+  line-height: 1.75;
+  font-weight: 400;
+}
+
+@media (min-width: 768px) {
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+}
+
+/* Travel-themed decorative elements */
+.travel-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M20 20c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8zm0-20c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8zm20 0c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8zm20 20c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8 8 3.6 8 8z'/%3E%3C/g%3E%3C/svg%3E");
 } 
