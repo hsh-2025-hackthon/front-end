@@ -1,4 +1,4 @@
-// 基础类型定义
+// 基礎類型定義
 export interface User {
   id: string;
   username: string;
@@ -20,7 +20,7 @@ export interface UpdateUser {
   email?: string;
 }
 
-// 旅行相关类型
+// 旅行相關類型
 export interface Trip {
   id: string;
   title: string;
@@ -58,7 +58,7 @@ export interface NewDestination {
   };
 }
 
-// 行程相关类型
+// 行程相關類型
 export interface Itinerary {
   id: string;
   tripId: string;
@@ -82,7 +82,7 @@ export interface ItineraryActivity {
   currency?: string;
 }
 
-// 智能卡片相关类型
+// 智慧卡片相關類型
 export interface ItineraryCard {
   id: string;
   tripId: string;
@@ -176,7 +176,7 @@ export interface SmartCardsSummary {
   };
 }
 
-// 聊天相关类型
+// 聊天相關類型
 export interface ChatRoom {
   id: string;
   tripId: string;
@@ -206,7 +206,7 @@ export interface ChatRoomMember {
   lastReadAt?: string;
 }
 
-// 投票相关类型
+// 投票相關類型
 export interface Vote {
   id: string;
   tripId: string;
@@ -241,7 +241,7 @@ export interface VoteResults {
   results: Record<string, number>;
 }
 
-// 费用管理相关类型
+// 費用管理相關類型
 export interface Expense {
   id: string;
   tripId: string;
@@ -403,7 +403,7 @@ export interface BookingDetails {
   details: any;
 }
 
-// AI 智能分析相关类型
+// AI 智慧分析相關類型
 export interface TravelRequirements {
   destinations: string[];
   budget: {
@@ -528,7 +528,7 @@ export interface AgentInfo {
   };
 }
 
-// 通知相关类型
+// 通知相關類型
 export interface Notification {
   id: string;
   userId: string;

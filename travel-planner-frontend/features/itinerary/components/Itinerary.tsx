@@ -130,7 +130,7 @@ export function Itinerary({ tripId }: { tripId: string }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">已添加</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">已新增</span>
                   </div>
                 </div>
               </div>

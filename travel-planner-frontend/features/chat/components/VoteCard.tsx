@@ -66,7 +66,7 @@ export default function VoteCard({ message }: VoteCardProps) {
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 border border-blue-200 dark:border-gray-600 shadow-sm">
-      {/* 投票头部 */}
+      {/* 投票標題 */}
       <div className="flex items-center mb-4">
         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
           <ChartBarIcon className="w-6 h-6 text-white" />
@@ -81,7 +81,7 @@ export default function VoteCard({ message }: VoteCardProps) {
         </div>
       </div>
 
-      {/* 投票选项 */}
+              {/* 投票選項 */}
       <div className="space-y-3 mb-4">
         {options.map((option) => {
           const percentage = getOptionPercentage(option.votes);
@@ -142,7 +142,7 @@ export default function VoteCard({ message }: VoteCardProps) {
         })}
       </div>
 
-      {/* 投票按钮 */}
+              {/* 投票按鈕 */}
       {!hasVoted && (
         <button
           onClick={handleSubmitVote}
@@ -160,7 +160,7 @@ export default function VoteCard({ message }: VoteCardProps) {
         </button>
       )}
 
-      {/* 投票状态信息 */}
+              {/* 投票狀態資訊 */}
       {hasVoted && (
         <div className="text-center text-sm text-green-600 dark:text-green-400 font-medium">
           ✅ 您已投票完成

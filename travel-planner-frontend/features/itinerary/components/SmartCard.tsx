@@ -229,7 +229,7 @@ export default function SmartCard({ card, onRefresh, onActionClick }: SmartCardP
           </div>
         )}
 
-        {/* 实时数据信息 */}
+        {/* 即時資料資訊 */}
         {card.enrichedData && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             {/* 天气信息 */}
@@ -277,7 +277,7 @@ export default function SmartCard({ card, onRefresh, onActionClick }: SmartCardP
                       {card.enrichedData.pricing.exchangeRate.convertedPrice}
                     </span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      汇率: {card.enrichedData.pricing.exchangeRate.rate}
+                      匯率: {card.enrichedData.pricing.exchangeRate.rate}
                     </span>
                   </div>
                   <div className="text-xs text-green-700 dark:text-green-300 mt-1">
@@ -311,7 +311,7 @@ export default function SmartCard({ card, onRefresh, onActionClick }: SmartCardP
               </div>
             )}
 
-            {/* 营业时间 */}
+                                {/* 營業時間 */}
             {card.enrichedData.operatingHours && (
               <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
                 <div className="flex items-center mb-2">

@@ -1,5 +1,6 @@
 import { useMsal } from "@azure/msal-react";
 import { SilentRequest } from "@azure/msal-browser";
+import { config } from "../../../lib/config";
 
 export function useAuth() {
   const { instance, accounts } = useMsal();
@@ -15,7 +16,7 @@ export function useAuth() {
   const getAccessToken = async () => {
     if (accounts.length > 0) {
       const request: SilentRequest = {
-        scopes: [process.env.NEXT_PUBLIC_API_SCOPE || "api://YOUR_API/access_as_user"],
+        scopes: [config.auth.apiScope],
         account: accounts[0],
       };
       try {

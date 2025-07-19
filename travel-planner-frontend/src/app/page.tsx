@@ -24,6 +24,7 @@ import {
 import ChatInterface from '../../features/chat/components/ChatInterface';
 import SmartCard from '../../features/itinerary/components/SmartCard';
 import ExpenseManager from '../../features/budget/components/ExpenseManager';
+import AnalyticsDashboard from '../../features/analytics/components/AnalyticsDashboard';
 import { tripApi, chatApi, expenseApi } from '../../lib/apiClient';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -50,8 +51,8 @@ export default function TravelPlannerApp() {
         
         // 如果有旅行，預設選擇第一個
         if (tripsData.length > 0 && !currentTripId) {
-          setCurrentTripId(tripsData[0].id);
-          setCurrentTrip(tripsData[0]);
+          (setCurrentTripId as any)(tripsData[0].id);
+          (setCurrentTrip as any)(tripsData[0]);
         }
       } catch (error) {
         console.error('Failed to load trips:', error);
@@ -62,7 +63,7 @@ export default function TravelPlannerApp() {
     };
 
     loadTrips();
-  }, [currentTripId, setCurrentTrip, setCurrentTripId]);
+  }, []);
 
   // 載入當前旅行的詳細資料
   useEffect(() => {
@@ -80,89 +81,89 @@ export default function TravelPlannerApp() {
         setSmartCards(smartCardsData.cards || []);
         setExpenses(expensesData);
         
-        // 设置默认聊天室
+        // 設置預設聊天室
         if (chatRoomsData.length > 0) {
           setChatRoomId(chatRoomsData[0].id);
         }
       } catch (error) {
         console.error('Failed to load trip data:', error);
-        toast.error('加载旅行数据失败');
+        toast.error('載入旅行資料失敗');
       }
     };
 
     loadTripData();
   }, [currentTripId, setSmartCards, setExpenses]);
 
-  // 创建新旅行
+  // 創建新旅行
   const handleCreateTrip = async () => {
-    const tripName = prompt('请输入旅行名称：');
+    const tripName = prompt('請輸入旅行名稱：');
     if (!tripName) return;
 
     try {
       const newTrip = await tripApi.create({
         title: tripName,
-        description: '新的旅行计划',
+        description: '新的旅行計劃',
         startDate: new Date().toISOString(),
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       });
 
       setTrips(prev => [newTrip, ...prev]);
-      setCurrentTripId(newTrip.id);
-      setCurrentTrip(newTrip);
-      toast.success('旅行创建成功！');
+      (setCurrentTripId as any)(newTrip.id);
+      (setCurrentTrip as any)(newTrip);
+      toast.success('旅行建立成功！');
     } catch (error) {
       console.error('Failed to create trip:', error);
-      toast.error('创建旅行失败');
+      toast.error('建立旅行失敗');
     }
   };
 
-  // 刷新智能卡片
+  // 重新整理智慧卡片
   const handleRefreshCard = async (cardId: string) => {
     try {
       await tripApi.refreshSmartCard(currentTripId!, cardId);
       const updatedCards = await tripApi.getSmartCards(currentTripId!);
       setSmartCards(updatedCards.cards || []);
-      toast.success('卡片数据已更新');
+      toast.success('卡片資料已更新');
     } catch (error) {
       console.error('Failed to refresh card:', error);
-      toast.error('刷新失败');
+      toast.error('重新整理失敗');
     }
   };
 
-  // 处理卡片操作
+  // 處理卡片操作
   const handleCardAction = async (cardId: string, actionId: string) => {
     console.log(`Card action: ${cardId} - ${actionId}`);
-    toast('功能开发中...');
+    toast('功能開發中...');
   };
 
-  // 添加费用
+  // 新增費用
   const handleAddExpense = async (expense: any) => {
     try {
       const newExpense = await expenseApi.createExpense(currentTripId!, expense);
       setExpenses(prev => [newExpense, ...prev]);
-      toast.success('费用添加成功');
+      toast.success('費用新增成功');
     } catch (error) {
       console.error('Failed to add expense:', error);
-      toast.error('添加费用失败');
+      toast.error('新增費用失敗');
     }
   };
 
-  // 处理分账
+  // 處理分帳
   const handleExpenseSplit = async (expenseId: string, splitData: any) => {
     try {
       await expenseApi.createSplit(expenseId, splitData);
-      toast.success('分账设置成功');
+      toast.success('分帳設定成功');
     } catch (error) {
       console.error('Failed to split expense:', error);
-      toast.error('分账设置失败');
+      toast.error('分帳設定失敗');
     }
   };
 
   const sidebarItems = [
-    { id: 'cards', name: '智能卡片', icon: MapIcon },
-    { id: 'chat', name: '群组聊天', icon: ChatBubbleLeftRightIcon },
-    { id: 'budget', name: '预算管理', icon: CurrencyDollarIcon },
-    { id: 'analytics', name: '数据分析', icon: ChartBarIcon }
+    { id: 'cards', name: '智慧卡片', icon: MapIcon },
+    { id: 'chat', name: '群組聊天', icon: ChatBubbleLeftRightIcon },
+    { id: 'budget', name: '預算管理', icon: CurrencyDollarIcon },
+    { id: 'analytics', name: '數據分析', icon: ChartBarIcon }
   ];
 
   if (loading) {
@@ -170,7 +171,7 @@ export default function TravelPlannerApp() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
+          <p className="text-gray-600 dark:text-gray-400">載入中...</p>
         </div>
       </div>
     );
@@ -196,23 +197,23 @@ export default function TravelPlannerApp() {
             </button>
 
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">
-              OurGo - 协同旅行规划
+              OurGo - 協同旅行規劃
             </h1>
 
-            {/* 旅行选择器 */}
+            {/* 旅行選擇器 */}
             <select
               value={currentTripId || ''}
               onChange={(e) => {
                 const tripId = e.target.value;
                 const trip = trips.find(t => t.id === tripId);
                 if (trip) {
-                  setCurrentTripId(tripId);
-                  setCurrentTrip(trip);
+                  (setCurrentTripId as any)(tripId);
+                  (setCurrentTrip as any)(trip);
                 }
               }}
               className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white"
             >
-              <option value="">选择旅行</option>
+              <option value="">選擇旅行</option>
               {trips.map((trip) => (
                 <option key={trip.id} value={trip.id}>
                   {trip.title}
@@ -230,7 +231,7 @@ export default function TravelPlannerApp() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* 通知按钮 */}
+            {/* 通知按鈕 */}
             <button className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
               <BellIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
               {notifications.length > 0 && (
@@ -276,11 +277,11 @@ export default function TravelPlannerApp() {
                 ))}
               </nav>
 
-              {/* 当前旅行信息 */}
+              {/* 當前旅行資訊 */}
               {currentTrip && (
                 <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <h3 className="font-medium text-gray-800 dark:text-white mb-2">
-                    当前旅行
+                    當前旅行
                   </h3>
                   <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                     <p className="font-medium">{currentTrip.title}</p>
@@ -296,37 +297,37 @@ export default function TravelPlannerApp() {
           </aside>
         )}
 
-        {/* 主内容区域 */}
+        {/* 主內容區域 */}
         <main className="flex-1 p-6">
           {!currentTripId ? (
             <div className="text-center py-16">
               <div className="max-w-md mx-auto">
                 <MapIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                  开始您的旅行规划
+                  開始您的旅行規劃
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  创建新旅行或选择现有旅行开始协同规划
+                  建立新旅行或選擇現有旅行開始協同規劃
             </p>
                 <button
                   onClick={handleCreateTrip}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                 >
-                  创建新旅行
+                  建立新旅行
                 </button>
           </div>
             </div>
           ) : (
             <>
-              {/* 智能卡片视图 */}
+              {/* 智慧卡片視圖 */}
               {currentPage === 'cards' && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                      智能行程卡片
+                      智慧行程卡片
                     </h2>
                     <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span>{smartCards.length} 个卡片</span>
+                      <span>{smartCards.length} 個卡片</span>
           </div>
         </div>
 
@@ -334,7 +335,7 @@ export default function TravelPlannerApp() {
                     <div className="text-center py-16">
                       <MapIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-600 dark:text-gray-400">
-                        还没有行程卡片，开始添加景点吧
+                        還沒有行程卡片，開始新增景點吧
                       </p>
             </div>
                   ) : (
@@ -352,32 +353,27 @@ export default function TravelPlannerApp() {
             </div>
               )}
 
-              {/* 聊天界面 */}
+              {/* 聊天介面 */}
               {currentPage === 'chat' && chatRoomId && (
                 <div className="h-[calc(100vh-8rem)]">
                   <ChatInterface tripId={currentTripId} roomId={chatRoomId} />
           </div>
               )}
 
-              {/* 预算管理 */}
+              {/* 預算管理 */}
               {currentPage === 'budget' && (
                 <ExpenseManager
                   tripId={currentTripId}
                   expenses={expenses}
-                  budget={null} // TODO: 加载预算数据
+                  budget={null} // TODO: 載入預算資料
                   onExpenseAdd={handleAddExpense}
                   onExpenseSplit={handleExpenseSplit}
                 />
               )}
 
-              {/* 数据分析 */}
+              {/* 數據分析 */}
               {currentPage === 'analytics' && (
-                <div className="text-center py-16">
-                  <ChartBarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-400">
-                    数据分析功能开发中...
-                  </p>
-        </div>
+                <AnalyticsDashboard tripId={currentTripId} />
               )}
             </>
           )}

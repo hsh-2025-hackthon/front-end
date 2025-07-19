@@ -1,15 +1,16 @@
 import { msalInstance } from "../services/msal";
 import { SilentRequest } from "@azure/msal-browser";
+import { config, API_ENDPOINTS } from "./config";
 
-// 后端 API 基础 URL，暂时留空供后续配置
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+// 後端 API 基礎 URL
+const API_BASE_URL = config.api.baseUrl;
 
-// 获取访问令牌
+// 取得存取權杖
 const getAccessToken = async () => {
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
     const request: SilentRequest = {
-      scopes: [process.env.NEXT_PUBLIC_API_SCOPE || "api://YOUR_API/access_as_user"],
+      scopes: [config.auth.apiScope],
       account: accounts[0],
     };
     try {
@@ -22,7 +23,7 @@ const getAccessToken = async () => {
   return null;
 };
 
-// 通用 API 客户端
+// 通用 API 用戶端
 const apiClient = async (url: string, method: string, body?: any, options?: RequestInit) => {
   const token = await getAccessToken();
   const headers = new Headers();
@@ -49,7 +50,7 @@ const apiClient = async (url: string, method: string, body?: any, options?: Requ
     throw new Error(errorData.error || errorData.message || response.statusText);
   }
 
-  // 处理空响应
+  // 處理空回應
   if (response.status === 204) {
     return null;
   }
@@ -62,24 +63,24 @@ const apiClient = async (url: string, method: string, body?: any, options?: Requ
   return response.text();
 };
 
-// 旅行相关 API
+// 旅行相關 API
 export const tripApi = {
-  // 获取所有旅行
+  // 取得所有旅行
   getAll: () => apiClient("/trips", "GET"),
   
-  // 创建新旅行
+  // 建立新旅行
   create: (tripData: any) => apiClient("/trips", "POST", tripData),
   
-  // 获取特定旅行
+  // 取得特定旅行
   getById: (tripId: string) => apiClient(`/trips/${tripId}`, "GET"),
   
   // 更新旅行
   update: (tripId: string, tripData: any) => apiClient(`/trips/${tripId}`, "PUT", tripData),
   
-  // 删除旅行
+  // 刪除旅行
   delete: (tripId: string) => apiClient(`/trips/${tripId}`, "DELETE"),
   
-  // 添加目的地
+  // 新增目的地
   addDestination: (tripId: string, destination: any) => 
     apiClient(`/trips/${tripId}/destinations`, "POST", destination),
   
@@ -87,29 +88,29 @@ export const tripApi = {
   updateDestination: (tripId: string, destinationId: string, destination: any) =>
     apiClient(`/trips/${tripId}/destinations/${destinationId}`, "PUT", destination),
   
-  // 删除目的地
+  // 刪除目的地
   deleteDestination: (tripId: string, destinationId: string) =>
     apiClient(`/trips/${tripId}/destinations/${destinationId}`, "DELETE"),
   
-  // 获取行程
+  // 取得行程
   getItinerary: (tripId: string) => apiClient(`/trips/${tripId}/itinerary`, "GET"),
   
-  // 获取智能卡片
+  // 取得智慧卡片
   getSmartCards: (tripId: string) => apiClient(`/trips/${tripId}/smart-cards`, "GET"),
   
-  // 刷新智能卡片
+  // 重新整理智慧卡片
   refreshSmartCard: (tripId: string, cardId: string) =>
     apiClient(`/trips/${tripId}/smart-cards/${cardId}/refresh`, "POST"),
   
-  // 获取智能卡片摘要
+  // 取得智慧卡片摘要
   getSmartCardsSummary: (tripId: string) => 
     apiClient(`/trips/${tripId}/smart-cards/summary`, "GET"),
   
-  // 获取时间线数据
+  // 取得時間軸資料
   getTimeline: (tripId: string, granularity: string = "day") =>
     apiClient(`/trips/${tripId}/timeline?granularity=${granularity}`, "GET"),
   
-  // 获取地图数据
+  // 取得地圖資料
   getMapData: (tripId: string, includeRoutes: boolean = true) =>
     apiClient(`/trips/${tripId}/map-data?includeRoutes=${includeRoutes}`, "GET"),
   
@@ -118,19 +119,19 @@ export const tripApi = {
     apiClient(`/trips/${tripId}/route-plan`, "POST", routeData),
 };
 
-// 协作相关 API
+// 協作相關 API
 export const collaborationApi = {
-  // 获取 WebPubSub 令牌
+  // 取得 WebPubSub 權杖
   getToken: (tripId: string) => apiClient(`/collaboration/token/${tripId}`, "GET"),
   
-  // 成员管理
+  // 成員管理
   addMember: (tripId: string, memberData: any) =>
     apiClient(`/trips/${tripId}/members`, "POST", memberData),
   
   removeMember: (tripId: string, userId: string) =>
     apiClient(`/trips/${tripId}/members/${userId}`, "DELETE"),
   
-  // 权限管理
+  // 權限管理
   getPermissions: (tripId: string) => apiClient(`/trips/${tripId}/permissions`, "GET"),
   
   updateMemberPermissions: (tripId: string, userId: string, permissions: any) =>
@@ -181,7 +182,7 @@ export const chatApi = {
   
   deleteMessage: (messageId: string) => apiClient(`/chat/messages/${messageId}`, "DELETE"),
   
-  // 聊天室成员管理
+  // 聊天室成員管理
   getRoomMembers: (roomId: string) => apiClient(`/chat/rooms/${roomId}/members`, "GET"),
   
   addRoomMember: (roomId: string, memberData: any) =>
@@ -193,17 +194,17 @@ export const chatApi = {
 
 // 投票相关 API
 export const voteApi = {
-  // 获取旅行的所有投票
+  // 取得旅行的所有投票
   getTripVotes: (tripId: string) => apiClient(`/trips/${tripId}/votes`, "GET"),
   
-  // 创建投票
+  // 建立投票
   createVote: (tripId: string, voteData: any) => 
     apiClient(`/trips/${tripId}/votes`, "POST", voteData),
   
-  // 获取特定投票
+  // 取得特定投票
   getVote: (voteId: string) => apiClient(`/votes/${voteId}`, "GET"),
   
-  // 提交投票回复
+  // 提交投票回覆
   submitVoteResponse: (voteId: string, responseData: any) =>
     apiClient(`/votes/${voteId}/responses`, "POST", responseData),
   
@@ -447,6 +448,65 @@ export const healthApi = {
   
   // 刷新健康检查
   refreshHealthChecks: () => apiClient("/health/refresh", "POST"),
+};
+
+// 數據分析 API
+export const analyticsApi = {
+  // 取得用戶分析數據
+  getUserAnalytics: (params?: { startDate: string; endDate: string }) =>
+    apiClient(`/analytics/user?${new URLSearchParams(params || {}).toString()}`, "GET"),
+  
+  // 取得特定旅行分析數據
+  getTripAnalytics: (tripId: string, params?: { startDate: string; endDate: string }) =>
+    apiClient(`/analytics/trips/${tripId}?${new URLSearchParams(params || {}).toString()}`, "GET"),
+  
+  // 取得用戶即時統計
+  getUserRealTimeStats: () => apiClient("/analytics/realtime/user", "GET"),
+  
+  // 取得旅行即時統計
+  getTripRealTimeStats: (tripId: string) => 
+    apiClient(`/analytics/realtime/trips/${tripId}`, "GET"),
+  
+  // 取得費用趨勢
+  getExpenseTrends: (tripId?: string, period: 'week' | 'month' | 'year' = 'month') =>
+    tripId 
+      ? apiClient(`/analytics/expenses/trends/${tripId}?period=${period}`, "GET")
+      : apiClient(`/analytics/expenses/trends?period=${period}`, "GET"),
+  
+  // 取得目的地熱度
+  getDestinationHeatmap: () => apiClient("/analytics/destinations/heatmap", "GET"),
+  
+  // 取得協作者活動統計
+  getCollaboratorActivity: (tripId: string) =>
+    apiClient(`/analytics/collaboration/${tripId}`, "GET"),
+  
+  // 取得預算對比分析
+  getBudgetComparison: (tripId?: string) =>
+    tripId 
+      ? apiClient(`/analytics/budget/comparison/${tripId}`, "GET")
+      : apiClient("/analytics/budget/comparison", "GET"),
+  
+  // 導出分析報表
+  exportAnalytics: async (tripId: string | undefined, format: 'csv' | 'pdf' | 'excel', params: { startDate: string; endDate: string }) => {
+    const token = await getAccessToken();
+    const queryParams = new URLSearchParams(params).toString();
+    const endpoint = tripId 
+      ? `/analytics/export/${tripId}/${format}?${queryParams}`
+      : `/analytics/export/${format}?${queryParams}`;
+    
+    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to export analytics');
+    }
+    
+    return response.blob();
+  }
 };
 
 export default apiClient;

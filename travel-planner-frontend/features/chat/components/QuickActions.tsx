@@ -31,7 +31,7 @@ interface FormData {
   destination?: string;
   location?: string;
   title?: string;
-  options?: string[];
+  options?: string | string[];
   amount?: number;
   description?: string;
   [key: string]: any;
@@ -64,19 +64,23 @@ export default function QuickActions({ tripId, onActionComplete }: QuickActionsP
 
   // 創建投票
   const handleCreateVote = async () => {
-    if (!formData.title || !formData.options || formData.options.length === 0) {
+    if (!formData.title || !formData.options) {
+      toast.error('請填寫投票標題和選項');
+      return;
+    }
+
+    const optionsArray = Array.isArray(formData.options) ? formData.options : formData.options.split('\n');
+    const validOptions = optionsArray.filter(option => option.trim());
+
+    if (validOptions.length === 0) {
       toast.error('請填寫投票標題和選項');
       return;
     }
 
     try {
-      const voteOptions = typeof formData.options === 'string' 
-        ? formData.options.split('\n').filter(option => option.trim())
-        : formData.options;
-
       await quickActionApi.createVote(tripId, {
         title: formData.title,
-        options: voteOptions.map((option, index) => ({
+        options: validOptions.map((option, index) => ({
           id: `option_${index}`,
           name: option.trim(),
           description: ''

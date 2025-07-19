@@ -1,5 +1,6 @@
 import { WebPubSubClient } from "@azure/web-pubsub-client";
 import * as Y from "yjs";
+import { config, WS_EVENTS } from "../lib/config";
 
 const messageType = {
   sync: 0,
@@ -35,7 +36,7 @@ export class WebPubSubProvider {
 
   public disconnect() {
     if (this.client && this.connected) {
-      this.client.stop();
+    this.client.stop();
       this.connected = false;
     }
   }
