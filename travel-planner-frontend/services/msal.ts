@@ -17,7 +17,10 @@ export const msalInstance = new PublicClientApplication(msalConfig);
 
 // Handle login events for logging or other actions
 msalInstance.addEventCallback((event) => {
-  if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
-    msalInstance.setActiveAccount(event.payload.account);
+  if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
+    const payload = event.payload as any;
+    if (payload.account) {
+      msalInstance.setActiveAccount(payload.account);
+    }
   }
 });

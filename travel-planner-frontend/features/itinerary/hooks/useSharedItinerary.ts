@@ -14,7 +14,6 @@ export function useSharedItinerary(tripId: string) {
     const provider = new WebPubSubProvider(
       connectionString,
       'collaborationHub',
-      tripId,
       ydoc
     );
 

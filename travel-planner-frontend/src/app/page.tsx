@@ -1,155 +1,387 @@
-export default function Home() {
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
+import {
+  ChatBubbleLeftRightIcon,
+  MapIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  BellIcon,
+  Cog6ToothIcon,
+  PlusIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
+import {
+  currentTripAtom,
+  currentTripIdAtom,
+  smartCardsAtom,
+  expensesAtom,
+  notificationsAtom,
+  currentPageAtom,
+  sidebarOpenAtom
+} from '../../store/atoms';
+import ChatInterface from '../../features/chat/components/ChatInterface';
+import SmartCard from '../../features/itinerary/components/SmartCard';
+import ExpenseManager from '../../features/budget/components/ExpenseManager';
+import { tripApi, chatApi, expenseApi } from '../../lib/apiClient';
+import toast, { Toaster } from 'react-hot-toast';
+
+export default function TravelPlannerApp() {
+  const [currentTrip, setCurrentTrip] = useAtom(currentTripAtom);
+  const [currentTripId, setCurrentTripId] = useAtom(currentTripIdAtom);
+  const [smartCards, setSmartCards] = useAtom(smartCardsAtom);
+  const [expenses, setExpenses] = useAtom(expensesAtom);
+  const [notifications, setNotifications] = useAtom(notificationsAtom);
+  const [currentPage, setCurrentPage] = useAtom(currentPageAtom);
+  const [sidebarOpen, setSidebarOpen] = useAtom(sidebarOpenAtom);
+
+  const [trips, setTrips] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [chatRoomId, setChatRoomId] = useState<string>('');
+
+  // 載入用戶旅行列表
+  useEffect(() => {
+    const loadTrips = async () => {
+      try {
+        setLoading(true);
+        const tripsData = await tripApi.getAll();
+        setTrips(tripsData);
+        
+        // 如果有旅行，預設選擇第一個
+        if (tripsData.length > 0 && !currentTripId) {
+          setCurrentTripId(tripsData[0].id);
+          setCurrentTrip(tripsData[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load trips:', error);
+        toast.error('載入旅行列表失敗');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrips();
+  }, [currentTripId, setCurrentTrip, setCurrentTripId]);
+
+  // 載入當前旅行的詳細資料
+  useEffect(() => {
+    if (!currentTripId) return;
+
+    const loadTripData = async () => {
+      try {
+        // 並行載入資料
+        const [smartCardsData, expensesData, chatRoomsData] = await Promise.all([
+          tripApi.getSmartCards(currentTripId),
+          expenseApi.getTripExpenses(currentTripId),
+          chatApi.getRooms(currentTripId)
+        ]);
+
+        setSmartCards(smartCardsData.cards || []);
+        setExpenses(expensesData);
+        
+        // 设置默认聊天室
+        if (chatRoomsData.length > 0) {
+          setChatRoomId(chatRoomsData[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to load trip data:', error);
+        toast.error('加载旅行数据失败');
+      }
+    };
+
+    loadTripData();
+  }, [currentTripId, setSmartCards, setExpenses]);
+
+  // 创建新旅行
+  const handleCreateTrip = async () => {
+    const tripName = prompt('请输入旅行名称：');
+    if (!tripName) return;
+
+    try {
+      const newTrip = await tripApi.create({
+        title: tripName,
+        description: '新的旅行计划',
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      });
+
+      setTrips(prev => [newTrip, ...prev]);
+      setCurrentTripId(newTrip.id);
+      setCurrentTrip(newTrip);
+      toast.success('旅行创建成功！');
+    } catch (error) {
+      console.error('Failed to create trip:', error);
+      toast.error('创建旅行失败');
+    }
+  };
+
+  // 刷新智能卡片
+  const handleRefreshCard = async (cardId: string) => {
+    try {
+      await tripApi.refreshSmartCard(currentTripId!, cardId);
+      const updatedCards = await tripApi.getSmartCards(currentTripId!);
+      setSmartCards(updatedCards.cards || []);
+      toast.success('卡片数据已更新');
+    } catch (error) {
+      console.error('Failed to refresh card:', error);
+      toast.error('刷新失败');
+    }
+  };
+
+  // 处理卡片操作
+  const handleCardAction = async (cardId: string, actionId: string) => {
+    console.log(`Card action: ${cardId} - ${actionId}`);
+    toast('功能开发中...');
+  };
+
+  // 添加费用
+  const handleAddExpense = async (expense: any) => {
+    try {
+      const newExpense = await expenseApi.createExpense(currentTripId!, expense);
+      setExpenses(prev => [newExpense, ...prev]);
+      toast.success('费用添加成功');
+    } catch (error) {
+      console.error('Failed to add expense:', error);
+      toast.error('添加费用失败');
+    }
+  };
+
+  // 处理分账
+  const handleExpenseSplit = async (expenseId: string, splitData: any) => {
+    try {
+      await expenseApi.createSplit(expenseId, splitData);
+      toast.success('分账设置成功');
+    } catch (error) {
+      console.error('Failed to split expense:', error);
+      toast.error('分账设置失败');
+    }
+  };
+
+  const sidebarItems = [
+    { id: 'cards', name: '智能卡片', icon: MapIcon },
+    { id: 'chat', name: '群组聊天', icon: ChatBubbleLeftRightIcon },
+    { id: 'budget', name: '预算管理', icon: CurrencyDollarIcon },
+    { id: 'analytics', name: '数据分析', icon: ChartBarIcon }
+  ];
+
+  if (loading) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-400 via-sky-500 to-orange-400 relative overflow-hidden travel-pattern">
-      {/* Floating Travel Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-20 h-20 bg-white/10 rounded-full animate-float">
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </div>
-        </div>
-        <div className="absolute top-40 right-32 w-16 h-16 bg-orange-300/20 rounded-full animate-bounce" style={{ animationDelay: '1s' }}>
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-          </div>
-        </div>
-        <div className="absolute bottom-32 left-1/4 w-24 h-24 bg-teal-300/15 rounded-full animate-pulse">
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-        </div>
-        <div className="absolute top-1/3 right-20 w-18 h-18 bg-white/10 rounded-full animate-float" style={{ animationDelay: '2s' }}>
-          <div className="w-full h-full flex items-center justify-center">
-            <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
-        {/* Hero Section */}
-        <div className="text-center mb-16 animate-fadeInUp">
-          <div className="mb-8">
-            <h1 className="hero-title">
-              OurGo
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Toaster position="top-right" />
+      
+      {/* 主导航栏 */}
+      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+                <div className="h-0.5 bg-gray-600 dark:bg-gray-300"></div>
+                <div className="h-0.5 bg-gray-600 dark:bg-gray-300"></div>
+                <div className="h-0.5 bg-gray-600 dark:bg-gray-300"></div>
+              </div>
+            </button>
+
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+              OurGo - 协同旅行规划
             </h1>
-            <div className="w-24 h-1 bg-orange-400 mx-auto rounded-full mb-6"></div>
-          </div>
-          <p className="hero-subtitle">
-            與朋友家人一起規劃完美旅程
-          </p>
-          <p className="text-lg text-white/80 max-w-xl mx-auto mb-8">
-            協作創建、分享和管理您的旅行行程。即時同步，輕鬆分帳，讓每一次旅行都成為美好回憶。
-          </p>
-          
-          {/* Feature Tags */}
-          <div className="flex flex-wrap items-center justify-center gap-4 text-white/80 mb-8">
-            <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
-              <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">即時協作</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
-              <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">智能分帳</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full">
-              <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">行程共享</span>
-            </div>
-          </div>
 
-          {/* CTA Button */}
-          <button className="btn-coral text-lg px-8 py-4 mb-4">
-            <div className="flex items-center justify-center gap-3">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span>開始規劃旅程</span>
-            </div>
-          </button>
-          <p className="text-sm text-white/70">免費使用，無需信用卡</p>
-        </div>
+            {/* 旅行选择器 */}
+            <select
+              value={currentTripId || ''}
+              onChange={(e) => {
+                const tripId = e.target.value;
+                const trip = trips.find(t => t.id === tripId);
+                if (trip) {
+                  setCurrentTripId(tripId);
+                  setCurrentTrip(trip);
+                }
+              }}
+              className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white"
+            >
+              <option value="">选择旅行</option>
+              {trips.map((trip) => (
+                <option key={trip.id} value={trip.id}>
+                  {trip.title}
+                </option>
+              ))}
+            </select>
 
-        {/* Features Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-          {/* Smart Itinerary Card */}
-          <div className="card-ourgo text-center group">
-            <div className="w-16 h-16 bg-gradient-to-br from-sky-400 to-sky-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">智能行程規劃</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              AI 助手幫您規劃最佳路線，景點推薦，時間安排一次搞定。支持拖拉重排，即時更新。
-            </p>
-            <div className="mt-4 flex justify-center">
-              <div className="w-8 h-1 bg-sky-400 rounded-full"></div>
-            </div>
+            <button
+              onClick={handleCreateTrip}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center transition-colors"
+            >
+              <PlusIcon className="w-4 h-4 mr-1" />
+              新建
+            </button>
           </div>
 
-          {/* Collaboration Card */}
-          <div className="card-ourgo text-center group">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">多人協作</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              邀請朋友家人一起參與規劃，即時聊天討論，投票決定行程。每個人都能貢獻想法。
-            </p>
-            <div className="mt-4 flex justify-center">
-              <div className="w-8 h-1 bg-orange-400 rounded-full"></div>
-            </div>
-          </div>
+          <div className="flex items-center space-x-4">
+            {/* 通知按钮 */}
+            <button className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              <BellIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
 
-          {/* Smart Expense Card */}
-          <div className="card-ourgo text-center group">
-            <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">智能分帳</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-              自動記錄花費，智能分配費用，支持多種分帳方式。旅行結束後一鍵結算，省去麻煩。
-            </p>
-            <div className="mt-4 flex justify-center">
-              <div className="w-8 h-1 bg-teal-400 rounded-full"></div>
-            </div>
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              <UserGroupIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
+
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+              <Cog6ToothIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+            </button>
           </div>
         </div>
+      </nav>
 
-        {/* Social Proof */}
-        <div className="mt-16 text-center animate-fadeInUp" style={{ animationDelay: '0.6s' }}>
-          <div className="flex items-center justify-center gap-8 text-white/80">
-            <div className="text-center">
-              <div className="text-2xl font-bold">10,000+</div>
-              <div className="text-sm">活躍用戶</div>
-            </div>
-            <div className="w-1 h-8 bg-white/30 rounded-full"></div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">50,000+</div>
-              <div className="text-sm">成功行程</div>
-            </div>
-            <div className="w-1 h-8 bg-white/30 rounded-full"></div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">95%</div>
-              <div className="text-sm">滿意度</div>
+      <div className="flex">
+        {/* 侧边栏 */}
+        {sidebarOpen && (
+          <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                功能模块
+              </h2>
+              <nav className="space-y-2">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentPage(item.id)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                      currentPage === item.id
+                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span>{item.name}</span>
+                  </button>
+                ))}
+              </nav>
+
+              {/* 当前旅行信息 */}
+              {currentTrip && (
+                <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <h3 className="font-medium text-gray-800 dark:text-white mb-2">
+                    当前旅行
+                  </h3>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <p className="font-medium">{currentTrip.title}</p>
+                    <p>{currentTrip.description}</p>
+                    <p>
+                      {new Date(currentTrip.startDate).toLocaleDateString()} - 
+                      {new Date(currentTrip.endDate).toLocaleDateString()}
+                    </p>
             </div>
           </div>
+              )}
+            </div>
+          </aside>
+        )}
+
+        {/* 主内容区域 */}
+        <main className="flex-1 p-6">
+          {!currentTripId ? (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <MapIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+                  开始您的旅行规划
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  创建新旅行或选择现有旅行开始协同规划
+            </p>
+                <button
+                  onClick={handleCreateTrip}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  创建新旅行
+                </button>
+          </div>
+            </div>
+          ) : (
+            <>
+              {/* 智能卡片视图 */}
+              {currentPage === 'cards' && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                      智能行程卡片
+                    </h2>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span>{smartCards.length} 个卡片</span>
+          </div>
         </div>
+
+                  {smartCards.length === 0 ? (
+                    <div className="text-center py-16">
+                      <MapIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400">
+                        还没有行程卡片，开始添加景点吧
+                      </p>
+            </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {smartCards.map((card) => (
+                        <SmartCard
+                          key={card.id}
+                          card={card}
+                          onRefresh={handleRefreshCard}
+                          onActionClick={handleCardAction}
+                        />
+                      ))}
+            </div>
+                  )}
+            </div>
+              )}
+
+              {/* 聊天界面 */}
+              {currentPage === 'chat' && chatRoomId && (
+                <div className="h-[calc(100vh-8rem)]">
+                  <ChatInterface tripId={currentTripId} roomId={chatRoomId} />
+          </div>
+              )}
+
+              {/* 预算管理 */}
+              {currentPage === 'budget' && (
+                <ExpenseManager
+                  tripId={currentTripId}
+                  expenses={expenses}
+                  budget={null} // TODO: 加载预算数据
+                  onExpenseAdd={handleAddExpense}
+                  onExpenseSplit={handleExpenseSplit}
+                />
+              )}
+
+              {/* 数据分析 */}
+              {currentPage === 'analytics' && (
+                <div className="text-center py-16">
+                  <ChartBarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    数据分析功能开发中...
+                  </p>
+        </div>
+              )}
+            </>
+          )}
+        </main>
       </div>
     </div>
   );
